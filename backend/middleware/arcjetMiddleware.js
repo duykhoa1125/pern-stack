@@ -3,6 +3,12 @@ import { aj } from "../lib/arcjet.js";
 
 const arcjetMiddleware = async (req, res, next) => {
   try {
+    // Skip Arcjet in development if no key is provided
+    if (!process.env.ARCJET_KEY && process.env.NODE_ENV !== "production") {
+      console.log("Arcjet middleware skipped - no ARCJET_KEY in development");
+      return next();
+    }
+
     const decision = await aj.protect(req, { requested: 2 }); // Deduct 2 tokens from the bucket
     console.log("Arcjet decision", decision);
 
@@ -32,7 +38,12 @@ const arcjetMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     console.log("Arcjet error:", error);
-    next(error);
+    // In production, fail closed for security
+    if (process.env.NODE_ENV === "production") {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    // In development, allow request to continue
+    next();
   }
 };
 
