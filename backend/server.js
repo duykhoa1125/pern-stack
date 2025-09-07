@@ -40,6 +40,15 @@ if (process.env.NODE_ENV === "production") {
 
 const initDB = async () => {
   try {
+    // Check if required environment variables are set
+    if (!process.env.PGHOST || !process.env.PGDATABASE || !process.env.PGUSER || !process.env.PGPASSWORD) {
+      console.log("Warning: Database environment variables not set. Skipping database initialization in development.");
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("Database environment variables are required in production");
+      }
+      return;
+    }
+
     await sql`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -52,10 +61,13 @@ const initDB = async () => {
     console.log("Database initialized");
   } catch (error) {
     console.log("Database connection error:", error);
+    if (process.env.NODE_ENV === "production") {
+      throw error; // Re-throw in production to fail the deployment
+    }
   }
 };
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 initDB().then(() => {
   app.listen(PORT, () => {

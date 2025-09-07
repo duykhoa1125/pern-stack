@@ -2,16 +2,22 @@ import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/node";
 
 import "dotenv/config";
 
+// Check if ARCJET_KEY is available
+if (!process.env.ARCJET_KEY && process.env.NODE_ENV === "production") {
+  console.error("ARCJET_KEY environment variable is required in production");
+  process.exit(1);
+}
+
 export const aj = arcjet({
   // Get your site key from https://app.arcjet.com and set it as an environment
   // variable rather than hard coding.
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY || "test-key-for-development",
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
-    shield({ mode: "LIVE" }),
+    shield({ mode: process.env.ARCJET_KEY ? "LIVE" : "DRY_RUN" }),
     // Create a bot detection rule
     detectBot({
-      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      mode: process.env.ARCJET_KEY ? "LIVE" : "DRY_RUN", // Use DRY_RUN if no key
       // Block all bots except the following
       allow: [
         "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
@@ -23,7 +29,7 @@ export const aj = arcjet({
     }),
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
-      mode: "LIVE",
+      mode: process.env.ARCJET_KEY ? "LIVE" : "DRY_RUN",
       // Tracked by IP address by default, but this can be customized
       // See https://docs.arcjet.com/fingerprints
       //characteristics: ["ip.src"],
