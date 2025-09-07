@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: pern-stack-app
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PGUSER
+        fromService:
+          type: pserv
+          name: pern-stack-db
+          property: user
+      - key: PGPASSWORD
+        fromService:
+          type: pserv
+          name: pern-stack-db
+          property: password
+      - key: PGHOST
+        fromService:
+          type: pserv
+          name: pern-stack-db
+          property: host
+      - key: PGPORT
+        fromService:
+          type: pserv
+          name: pern-stack-db
+          property: port
+      - key: PGDATABASE
+        fromService:
+          type: pserv
+          name: pern-stack-db
+          property: database
+      - key: ARCJET_KEY
+        sync: false
+      - key: ARCJET_ENV
+        value: production
+
+databases:
+  - name: pern-stack-db
+    plan: free
