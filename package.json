@@ -41,14 +41,12 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "cross-env": "^7.0.3"
+    "concurrently": "^9.2.1"
   },
   "scripts": {
     "dev": "nodemon backend/server.js",
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
-    "start": "cross-env NODE_ENV=production node backend/server.js",
-    "postinstall": "npm install --prefix frontend && npm install --prefix backend"
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
+    "start": "npm run start --prefix backend"
   },
   "keywords": [],
   "author": "",
